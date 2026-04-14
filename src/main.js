@@ -6,6 +6,7 @@
 import * as THREE from "three";
 import {
   initTC,
+  getLastInitTCError,
   tcApi,
   listLoadedTCFiles,
   downloadTCFile,
@@ -616,7 +617,13 @@ window.addEventListener("DOMContentLoaded", async () => {
       setStatus(`Could not read loaded viewer models: ${error.message}`, "error");
     }
   } else {
-    setStatus("Open this add-on inside the Trimble Connect 3D viewer to read loaded models.");
+    const detail = getLastInitTCError();
+    setStatus(
+      detail
+        ? `Could not connect to Trimble Connect: ${detail}`
+        : "Open this add-on inside the Trimble Connect 3D viewer to read loaded models.",
+      "error"
+    );
     addBtn.disabled = true;
   }
 

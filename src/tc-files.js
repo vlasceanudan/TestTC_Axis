@@ -10,10 +10,12 @@ let placedIconIds = [];
 let placedMarkupIds = [];
 let placedSectionPlaneIds = [];
 let hasPlacedSectionBox = false;
+let lastInitTCError = "";
 const ICON_BATCH_SIZE = 25;
 const MARKUP_BATCH_SIZE = 50;
 const tcpsProjectCache = new Map();
 const tcpsProjectFileSystemCache = new Map();
+const CONNECT_ATTEMPT_TIMEOUT_MS = 4000;
 
 function startsWithTrbSignature(buffer) {
   const bytes = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 4));
@@ -287,24 +289,54 @@ async function downloadViaSignedUrl(projectId, loadedModel, fileId, versionId, k
  * @returns {Promise<boolean>}
  */
 export async function initTC() {
+  lastInitTCError = "";
+
   try {
     const { connect } = await import("trimble-connect-workspace-api");
-    tcApi = await connect(
-      window.parent,
-      (eventName, data) => {
-        if (eventName === "extension.accessToken") {
-          const token =
-            data?.accessToken ||
-            data?.data ||
-            (typeof data === "string" ? data : null);
 
-          if (typeof token === "string" && token.length > 0) {
-            accessToken = token;
-          }
+    const onEvent = (eventName, data) => {
+      if (eventName === "extension.accessToken") {
+        const token =
+          data?.accessToken ||
+          data?.data ||
+          (typeof data === "string" ? data : null);
+
+        if (typeof token === "string" && token.length > 0) {
+          accessToken = token;
         }
-      },
-      5000
-    );
+      }
+    };
+
+    const targets = [];
+    if (window.parent && window.parent !== window) {
+      targets.push({
+        target: window.parent,
+        label: "parent window",
+      });
+    }
+    targets.push({
+      target: window,
+      label: "current window",
+    });
+
+    let lastError = null;
+    for (const candidate of targets) {
+      try {
+        tcApi = await connectWithTimeout(
+          () => connect(candidate.target, onEvent, 5000),
+          CONNECT_ATTEMPT_TIMEOUT_MS,
+          `Timed out while connecting through the ${candidate.label}.`
+        );
+        break;
+      } catch (error) {
+        lastError = error;
+        tcApi = null;
+      }
+    }
+
+    if (!tcApi) {
+      throw lastError || new Error("Trimble Connect did not respond to the workspace API handshake.");
+    }
 
     try {
       await tcApi.extension.requestPermission("accesstoken");
@@ -313,10 +345,15 @@ export async function initTC() {
     }
 
     return true;
-  } catch {
+  } catch (error) {
     tcApi = null;
+    lastInitTCError = error?.message || "Trimble Connect workspace API handshake failed.";
     return false;
   }
+}
+
+export function getLastInitTCError() {
+  return lastInitTCError;
 }
 
 /**
@@ -806,4 +843,13 @@ function waitFor(condition, ms) {
 
     check();
   });
+}
+
+function connectWithTimeout(runConnect, timeoutMs, timeoutMessage) {
+  return Promise.race([
+    runConnect(),
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    }),
+  ]);
 }
