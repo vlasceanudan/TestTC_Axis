@@ -1,0 +1,23 @@
+{
+  "name": "trimble-connect-alignment-labeller",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:pages": "vite build && node scripts/write-hosted-manifest.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@thatopen/components": "2.4.2",
+    "@thatopen/components-front": "2.4.2",
+    "@thatopen/ui": "2.4.2",
+    "three": "^0.160.1",
+    "trimble-connect-sdk": "^4.0.11",
+    "trimble-connect-workspace-api": "^0.3.34",
+    "web-ifc": "^0.0.66"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
+}
