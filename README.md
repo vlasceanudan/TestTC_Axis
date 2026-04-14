@@ -22,6 +22,14 @@ This repository includes a GitHub Actions workflow at [.github/workflows/deploy-
 3. generates a hosted Trimble manifest for the deployed URL,
 4. publishes `dist/` to GitHub Pages.
 
+This repo also supports branch-based GitHub Pages publishing from `/docs` when the Pages UI is configured to deploy from `main` and the `/docs` folder. Use:
+
+```bash
+npm run build:docs
+```
+
+That writes the compiled site, hosted manifest, and `.nojekyll` into `docs/` so GitHub Pages can serve the built app directly from the branch.
+
 After the repository is pushed to GitHub and Pages is enabled, the hosted site URL is:
 
 `https://<github-owner>.github.io/trimble-connect-add-on/`
@@ -45,7 +53,7 @@ Use the deployed GitHub Pages panel URL in Trimble Connect:
 
 Testers should open the Trimble Connect 3D viewer, register that hosted URL as the add-on panel URL, and then load IFC or LandXML models before using the tool.
 
-Detailed tester onboarding is documented in [docs/testing-github-pages.md](docs/testing-github-pages.md).
+Detailed tester onboarding is documented in [guides/testing-github-pages.md](guides/testing-github-pages.md).
 
 ## Deployment verification
 

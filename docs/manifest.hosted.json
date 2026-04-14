@@ -1,0 +1,13 @@
+{
+  "id": "alignment-labeller",
+  "name": "Alignment Labeller",
+  "description": "Labels IFC and LandXML alignments loaded in the Trimble Connect viewer",
+  "version": "1.0.0",
+  "extension": {
+    "panel": {
+      "url": "https://vlasceanudan.github.io/TestTC_Axis/index.html",
+      "title": "Alignment Labeller",
+      "width": 360
+    }
+  }
+}

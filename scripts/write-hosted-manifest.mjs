@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
-const distDir = path.join(projectRoot, "dist");
+const outputDir = path.join(projectRoot, process.env.HOSTED_OUTPUT_DIR?.trim() || "dist");
 const manifestPath = path.join(projectRoot, "manifest.json");
 
 function trimTrailingSlash(value) {
@@ -67,14 +67,15 @@ const hostedManifest = {
   },
 };
 
-await mkdir(distDir, { recursive: true });
+await mkdir(outputDir, { recursive: true });
 await writeFile(
-  path.join(distDir, "manifest.hosted.json"),
+  path.join(outputDir, "manifest.hosted.json"),
   `${JSON.stringify(hostedManifest, null, 2)}\n`,
   "utf8"
 );
-await writeFile(path.join(distDir, "hosted-site-url.txt"), `${siteUrl}\n`, "utf8");
-await writeFile(path.join(distDir, "hosted-panel-url.txt"), `${panelUrl}\n`, "utf8");
+await writeFile(path.join(outputDir, "hosted-site-url.txt"), `${siteUrl}\n`, "utf8");
+await writeFile(path.join(outputDir, "hosted-panel-url.txt"), `${panelUrl}\n`, "utf8");
+await writeFile(path.join(outputDir, ".nojekyll"), "", "utf8");
 
 console.log(`Hosted site URL: ${siteUrl}`);
 console.log(`Hosted panel URL: ${panelUrl}`);

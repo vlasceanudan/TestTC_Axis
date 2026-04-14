@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:pages": "vite build && node scripts/write-hosted-manifest.mjs",
+    "build:docs": "vite build --outDir docs && node scripts/write-hosted-manifest.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alignment Labeller</title>
+  <style>
+    :root {
+      --tc-bg: #f4f6f9;
+      --tc-panel: #ffffff;
+      --tc-border: #d7dde7;
+      --tc-border-soft: #e8edf4;
+      --tc-text: #22324d;
+      --tc-text-soft: #6f7f96;
+      --tc-text-muted: #8795a9;
+      --tc-accent: #0b78d1;
+      --tc-accent-dark: #0767b3;
+      --tc-accent-soft: #e8f3fb;
+      --tc-danger: #c84949;
+      --tc-success: #1d8f63;
+      --tc-shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 8px 24px rgba(16, 24, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      overflow: hidden;
+      background: var(--tc-bg);
+      color: var(--tc-text);
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+    }
+
+    .shell {
+      display: flex;
+      height: 100vh;
+      background: linear-gradient(180deg, #f9fbfd 0%, #f2f5f8 100%);
+    }
+
+    .rail {
+      width: 42px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      background: linear-gradient(180deg, #f8fafc 0%, #f2f5f9 100%);
+      border-right: 1px solid var(--tc-border);
+    }
+
+    .rail-button {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .rail-button::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 1.8px solid #5f6f86;
+      border-radius: 4px;
+    }
+
+    .rail-button.is-active {
+      background: var(--tc-accent-soft);
+      border-color: #c8dff3;
+    }
+
+    .rail-button.is-active::before {
+      border-color: var(--tc-accent);
+    }
+
+    .rail-spacer {
+      flex: 1 1 auto;
+    }
+
+    .panel {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--tc-panel);
+      box-shadow: var(--tc-shadow);
+    }
+
+    .panel-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--tc-border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, #0b78d1, #0b78d1 55%, #45a3ea 55%);
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 35% 35%, 35% 100%, 0 100%);
+      flex: 0 0 auto;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2b3d57;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-subtitle {
+      margin-top: 2px;
+      font-size: 18px;
+      line-height: 1.1;
+      font-weight: 400;
+      color: #1f2e45;
+    }
+
+    .panel-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--tc-text-muted);
+      font-size: 12px;
+    }
+
+    .toolbar-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #7f8ea4;
+      opacity: 0.7;
+    }
+
+    .panel-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      padding: 14px;
+      background:
+        linear-gradient(180deg, rgba(244, 247, 250, 0.95) 0%, rgba(255, 255, 255, 0.96) 16%, #ffffff 100%);
+    }
+
+    .summary {
+      margin-bottom: 14px;
+      padding: 12px 13px;
+      border-radius: 10px;
+      background: #f8fbfe;
+      border: 1px solid #d7e7f5;
+      color: #567089;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .section {
+      margin-bottom: 14px;
+      border: 1px solid var(--tc-border-soft);
+      border-radius: 12px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 12px 13px 10px;
+      border-bottom: 1px solid var(--tc-border-soft);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 400;
+      color: #1f2e45;
+    }
+
+    .section-subtitle {
+      margin-top: 3px;
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--tc-text-soft);
+    }
+
+    .section-content {
+      padding: 12px 13px 13px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      color: #5f6f86;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid #cfd7e2;
+      background: #ffffff;
+      color: var(--tc-text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    select {
+      width: 100%;
+      height: 34px;
+      padding: 0 34px 0 10px;
+      border-radius: 6px;
+      border: 1px solid #cfd7e2;
+      background:
+        linear-gradient(45deg, transparent 50%, #708098 50%) calc(100% - 16px) calc(50% - 2px) / 7px 7px no-repeat,
+        linear-gradient(135deg, #708098 50%, transparent 50%) calc(100% - 11px) calc(50% - 2px) / 7px 7px no-repeat,
+        #ffffff;
+      color: var(--tc-text);
+      font-size: 13px;
+      outline: none;
+      appearance: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: #88bce7;
+      box-shadow: 0 0 0 3px rgba(11, 120, 209, 0.12);
+    }
+
+    .field-help {
+      margin-top: 2px;
+      margin-bottom: 12px;
+      color: var(--tc-text-soft);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .selector-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .selector-row select {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .selector-row button {
+      flex: 0 0 auto;
+      min-width: 84px;
+    }
+
+    button {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    #addBtn,
+    #addPlanesBtn {
+      flex: 1 1 auto;
+      background: var(--tc-accent);
+      border-color: var(--tc-accent);
+      color: #ffffff;
+    }
+
+    #addBtn:hover:not(:disabled),
+    #addPlanesBtn:hover:not(:disabled) {
+      background: var(--tc-accent-dark);
+      border-color: var(--tc-accent-dark);
+    }
+
+    #clearBtn,
+    #clearPlanesBtn,
+    #refreshAlignmentsBtn {
+      flex: 0 0 auto;
+      min-width: 92px;
+      background: #ffffff;
+      border-color: #cfd7e2;
+      color: #44556d;
+    }
+
+    #clearBtn:hover:not(:disabled),
+    #clearPlanesBtn:hover:not(:disabled),
+    #refreshAlignmentsBtn:hover:not(:disabled) {
+      background: #f4f7fa;
+      border-color: #bfc9d7;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .pos-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .pos-field {
+      flex: 1 1 0;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #dce4ee;
+      background: #f8fafc;
+      color: #5c728d;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    #status.error {
+      border-color: #efc1c1;
+      background: #fff5f5;
+      color: var(--tc-danger);
+    }
+
+    #status.success {
+      border-color: #bde2d2;
+      background: #f3fbf7;
+      color: var(--tc-success);
+    }
+
+    #progress {
+      margin-top: 10px;
+      height: 3px;
+      border-radius: 999px;
+      background: #e5ebf2;
+      overflow: hidden;
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: var(--tc-accent);
+      transition: width 0.25s ease;
+    }
+
+    #progressBar.indeterminate {
+      width: 38%;
+      animation: slide 1s infinite linear;
+    }
+
+    @keyframes slide {
+      0% { transform: translateX(-115%); }
+      100% { transform: translateX(365%); }
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/index-aa3f4e6f.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail" aria-hidden="true">
+      <div class="rail-button is-active"></div>
+      <div class="rail-button"></div>
+      <div class="rail-button"></div>
+      <div class="rail-button"></div>
+      <div class="rail-spacer"></div>
+      <div class="rail-button"></div>
+      <div class="rail-button"></div>
+    </aside>
+
+    <main class="panel">
+      <header class="panel-topbar">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div class="brand-copy">
+            <div class="brand-title">Trimble Connect</div>
+            <div class="brand-subtitle">Alignment Labeller</div>
+          </div>
+        </div>
+        <div class="panel-toolbar">
+          <span>Selected models</span>
+          <span class="toolbar-dot"></span>
+          <span>Viewer</span>
+        </div>
+      </header>
+
+      <div class="panel-body">
+        <div class="summary">
+          Reads the IFC and LandXML models already loaded in the Trimble Connect viewer and works directly on the selected alignment.
+        </div>
+
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">Labels</div>
+            <div class="section-subtitle">Create chainage labels on the selected alignment axis.</div>
+          </div>
+          <div class="section-content">
+            <label class="field-label" for="intervalInput">Chainage Interval (m)</label>
+            <input type="number" id="intervalInput" value="100" min="1" max="10000" step="1" />
+
+            <label class="field-label">Selected Alignment</label>
+            <div class="field-help">
+              Click the alignment in the Trimble Connect viewer or pick it from the visible alignment list below.
+            </div>
+
+            <div class="selector-row">
+              <select id="alignmentSelect">
+                <option value="">Viewer selection</option>
+              </select>
+              <button id="refreshAlignmentsBtn" type="button">Refresh</button>
+            </div>
+
+            <div class="btn-row">
+              <button id="addBtn" disabled>Add Labels</button>
+              <button id="clearBtn" disabled>Clear</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">Clipping</div>
+            <div class="section-subtitle">Isolate a longitudinal segment using start and end chainage.</div>
+          </div>
+          <div class="section-content">
+            <div class="pos-row">
+              <div class="pos-field">
+                <label class="field-label" for="startPosInput">Start (m)</label>
+                <input type="number" id="startPosInput" value="0" min="0" step="1" />
+              </div>
+              <div class="pos-field">
+                <label class="field-label" for="endPosInput">End (m)</label>
+                <input type="number" id="endPosInput" value="1000" min="0" step="1" />
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button id="addPlanesBtn" disabled>Add Cutting Planes</button>
+              <button id="clearPlanesBtn" disabled>Remove</button>
+            </div>
+          </div>
+        </section>
+
+        <div id="status">Connecting to Trimble Connect...</div>
+        <div id="progress"><div id="progressBar"></div></div>
+      </div>
+    </main>
+  </div>
+
+  
+</body>
+</html>
